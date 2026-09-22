@@ -7,6 +7,8 @@
     unit,
     placeholder,
     decimal = false,
+    autofocus = false,
+    selectOnFocus = false,
   }: {
     label: string;
     value: number | null;
@@ -14,6 +16,9 @@
     placeholder?: string;
     /** true erlaubt Nachkommastellen und oeffnet die Dezimaltastatur. */
     decimal?: boolean;
+    autofocus?: boolean;
+    /** Markiert den Inhalt beim Fokussieren, damit Tippen ihn ersetzt. */
+    selectOnFocus?: boolean;
   } = $props();
 
   const id = `field-${crypto.randomUUID()}`;
@@ -44,6 +49,7 @@
   <label for={id}>{label}</label>
   <div class="input">
     <!-- type="text" statt "number": Safari akzeptiert damit auch das Komma. -->
+    <!-- svelte-ignore a11y_autofocus -->
     <input
       {id}
       type="text"
@@ -52,9 +58,11 @@
       autocorrect="off"
       spellcheck="false"
       enterkeyhint="done"
+      {autofocus}
       {placeholder}
       value={text}
       oninput={handleInput}
+      onfocus={selectOnFocus ? (event) => event.currentTarget.select() : undefined}
     />
     {#if unit}<span class="unit">{unit}</span>{/if}
   </div>

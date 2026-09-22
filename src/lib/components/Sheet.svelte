@@ -8,6 +8,7 @@
     confirmLabel,
     confirmDisabled = false,
     onconfirm,
+    oncancel,
     children,
   }: {
     open: boolean;
@@ -16,6 +17,8 @@
     confirmLabel?: string;
     confirmDisabled?: boolean;
     onconfirm?: () => void;
+    /** Ohne Angabe schliesst die linke Schaltflaeche das Sheet. */
+    oncancel?: () => void;
     children: Snippet;
   } = $props();
 
@@ -37,7 +40,9 @@
 <dialog bind:this={dialog} onclose={() => (open = false)} onclick={closeOnBackdrop}>
   <div class="sheet">
     <header>
-      <button type="button" class="text-btn" onclick={() => (open = false)}>{cancelLabel}</button>
+      <button type="button" class="text-btn" onclick={() => (oncancel ? oncancel() : (open = false))}>
+        {cancelLabel}
+      </button>
       <h2>{title}</h2>
       {#if confirmLabel}
         <button

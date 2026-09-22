@@ -1,7 +1,9 @@
 import { loadProfile, saveProfile, type ProfileInput } from '../db/profile';
 import type { UserProfile } from '../db/types';
 
-let profile = $state<UserProfile | null>(null);
+// raw: das Profil wird immer als Ganzes ersetzt und bleibt so ein einfaches
+// Objekt, das sich wieder speichern laesst.
+let profile = $state.raw<UserProfile | null>(null);
 let ready = $state(false);
 
 export const profileStore = {

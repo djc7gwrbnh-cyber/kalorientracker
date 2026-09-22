@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AddEntrySheet from './AddEntrySheet.svelte';
   import AppHeader from '../components/AppHeader.svelte';
   import DayEntries from '../components/DayEntries.svelte';
   import DayRings from '../components/DayRings.svelte';
@@ -12,6 +13,7 @@
   import { formatDayLong, todayKey } from '../utils/date';
 
   let settingsOpen = $state(false);
+  let addOpen = $state(false);
 
   const day = todayKey();
   const entries = liveValue<FoodEntry[]>(() => listEntriesForDay(day), []);
@@ -51,17 +53,28 @@
 
   <div class="entries">
     {#if entries.current.length === 0}
-      <EmptyState
-        title="Noch nichts eingetragen"
-        description="Tippe auf „+“, um dein erstes Lebensmittel für heute zu erfassen."
-      />
+      <EmptyState title="Noch nichts eingetragen" description="Tippe auf „+“, um zu starten." />
     {:else}
       <DayEntries entries={entries.current} />
     {/if}
   </div>
 </div>
 
+<button type="button" class="fab" aria-label="Essen hinzufügen" onclick={() => (addOpen = true)}>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.4"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+</button>
+
 <SettingsSheet bind:open={settingsOpen} />
+<AddEntrySheet bind:open={addOpen} {day} />
 
 <style>
   .gear {
@@ -85,5 +98,32 @@
 
   .entries {
     margin-top: 24px;
+    /* Platz, damit der letzte Eintrag ueber den "+"-Button gescrollt werden kann. */
+    padding-bottom: 76px;
+  }
+
+  .fab {
+    position: absolute;
+    right: max(16px, var(--safe-right));
+    bottom: calc(var(--tabbar-height) + var(--safe-bottom) + 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+    transition: transform 0.12s ease;
+  }
+
+  .fab svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .fab:active {
+    transform: scale(0.94);
   }
 </style>

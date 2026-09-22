@@ -13,7 +13,7 @@
 
   let query = $state('');
   let editorOpen = $state(false);
-  let editing = $state<Food | null>(null);
+  let editing = $state.raw<Food | null>(null);
 
   const filtered = $derived(foods.current.filter((food) => matchesQuery(food.name, query)));
 

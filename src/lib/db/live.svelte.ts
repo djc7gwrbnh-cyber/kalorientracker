@@ -8,7 +8,12 @@ import { liveQuery } from 'dexie';
  * muss dieser ueber `deps` gelesen werden, damit neu abonniert wird.
  */
 export function liveValue<T>(query: () => Promise<T>, initial: T, deps?: () => unknown) {
-  let value = $state<T>(initial);
+  /*
+   * $state.raw statt $state: das Ergebnis wird immer komplett ersetzt, nie
+   * einzeln veraendert. Ausserdem blieben die Datensaetze sonst Proxys, die
+   * sich nicht zurueck in IndexedDB schreiben lassen (DataCloneError).
+   */
+  let value = $state.raw<T>(initial);
 
   $effect(() => {
     deps?.();

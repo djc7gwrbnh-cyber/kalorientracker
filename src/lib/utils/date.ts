@@ -93,4 +93,12 @@ export const CATEGORY_LABELS: Record<MealCategory, string> = {
   snack: 'Snack',
 };
 
+/** Kurzform fuer schmale Bedienelemente. */
+export const CATEGORY_SHORT_LABELS: Record<MealCategory, string> = {
+  breakfast: 'Früh',
+  lunch: 'Mittag',
+  dinner: 'Abend',
+  snack: 'Snack',
+};
+
 export const CATEGORY_ORDER: MealCategory[] = ['breakfast', 'lunch', 'dinner', 'snack'];
