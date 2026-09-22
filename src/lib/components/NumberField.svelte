@@ -19,9 +19,24 @@
   const id = `field-${crypto.randomUUID()}`;
   let text = $state(value === null ? '' : toInputValue(value));
 
+  /*
+   * Der angezeigte Text gehoert dem Feld, damit Zwischenstaende wie "108,"
+   * beim Tippen erhalten bleiben. Setzt der Aufrufer den Wert neu (z. B. weil
+   * ein Sheet mit anderen Daten geoeffnet wird), wird der Text nachgezogen.
+   */
+  let lastValue = value;
+
+  $effect(() => {
+    if (value !== lastValue) {
+      lastValue = value;
+      text = value === null ? '' : toInputValue(value);
+    }
+  });
+
   function handleInput(event: Event) {
     text = (event.currentTarget as HTMLInputElement).value;
     value = parseDecimal(text);
+    lastValue = value;
   }
 </script>
 
