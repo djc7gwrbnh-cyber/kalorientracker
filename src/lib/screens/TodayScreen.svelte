@@ -1,18 +1,21 @@
 <script lang="ts">
   import AppHeader from '../components/AppHeader.svelte';
   import EmptyState from '../components/EmptyState.svelte';
+  import SettingsSheet from './SettingsSheet.svelte';
+  import { formatDayLong, todayKey } from '../utils/date';
 
-  const heute = new Intl.DateTimeFormat('de-DE', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(new Date());
+  let settingsOpen = $state(false);
 </script>
 
 <div class="screen">
-  <AppHeader title="Heute" subtitle={heute}>
+  <AppHeader title="Heute" subtitle={formatDayLong(todayKey())}>
     {#snippet action()}
-      <button type="button" class="gear" aria-label="Einstellungen">
+      <button
+        type="button"
+        class="gear"
+        aria-label="Einstellungen"
+        onclick={() => (settingsOpen = true)}
+      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -36,6 +39,8 @@
     description="Hier erscheinen gleich deine Ringe für Kalorien, Protein und Fett sowie die Einträge des Tages."
   />
 </div>
+
+<SettingsSheet bind:open={settingsOpen} />
 
 <style>
   .gear {

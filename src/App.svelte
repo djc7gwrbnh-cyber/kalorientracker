@@ -4,27 +4,42 @@
   import HistoryScreen from './lib/screens/HistoryScreen.svelte';
   import LibraryScreen from './lib/screens/LibraryScreen.svelte';
   import WeightScreen from './lib/screens/WeightScreen.svelte';
+  import OnboardingScreen from './lib/screens/OnboardingScreen.svelte';
+  import { profileStore } from './lib/stores/profile.svelte';
   import type { Tab } from './lib/navigation';
 
   let tab = $state<Tab>('today');
+
+  void profileStore.load();
 </script>
 
-<div class="app">
-  <main>
-    {#if tab === 'today'}
-      <TodayScreen />
-    {:else if tab === 'history'}
-      <HistoryScreen />
-    {:else if tab === 'library'}
-      <LibraryScreen />
-    {:else}
-      <WeightScreen />
-    {/if}
-  </main>
-  <TabBar active={tab} onselect={(next) => (tab = next)} />
-</div>
+{#if !profileStore.ready}
+  <div class="boot"></div>
+{:else if !profileStore.current}
+  <OnboardingScreen />
+{:else}
+  <div class="app">
+    <main>
+      {#if tab === 'today'}
+        <TodayScreen />
+      {:else if tab === 'history'}
+        <HistoryScreen />
+      {:else if tab === 'library'}
+        <LibraryScreen />
+      {:else}
+        <WeightScreen />
+      {/if}
+    </main>
+    <TabBar active={tab} onselect={(next) => (tab = next)} />
+  </div>
+{/if}
 
 <style>
+  .boot {
+    height: 100dvh;
+    background: var(--bg);
+  }
+
   .app {
     position: relative;
     height: 100dvh;

@@ -141,6 +141,54 @@ h3 {
   padding: 0 4px 8px;
 }
 
+.hint {
+  margin: 10px 4px 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border-radius: var(--radius-control);
+  font-size: 17px;
+  font-weight: 600;
+  transition:
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+  width: 100%;
+}
+
+.btn-secondary {
+  background: var(--fill);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: var(--fill);
+  color: var(--danger);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
