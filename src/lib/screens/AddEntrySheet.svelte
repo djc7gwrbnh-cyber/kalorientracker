@@ -2,22 +2,21 @@
   import EmptyState from '../components/EmptyState.svelte';
   import FormGroup from '../components/FormGroup.svelte';
   import NumberField from '../components/NumberField.svelte';
+  import PickerList from '../components/PickerList.svelte';
   import SearchField from '../components/SearchField.svelte';
   import SegmentedControl from '../components/SegmentedControl.svelte';
   import Sheet from '../components/Sheet.svelte';
+  import { mealNutrients } from '../calc/meals';
   import { scaleNutrients } from '../calc/nutrition';
-  import { buildPickerSections } from '../calc/picker';
+  import { buildPickerSections, sortByRelevance } from '../calc/picker';
   import { matchesQuery } from '../calc/search';
-  import { addEntries } from '../db/entries';
-  import { listFoods, markFoodUsed } from '../db/foods';
+  import { listFoods } from '../db/foods';
   import { liveValue } from '../db/live.svelte';
-  import type { Food, MealCategory } from '../db/types';
-  import {
-    CATEGORY_ORDER,
-    CATEGORY_SHORT_LABELS,
-    suggestCategory,
-    todayKey,
-  } from '../utils/date';
+  import { listMeals } from '../db/meals';
+  import type { Food, Meal, MealCategory } from '../db/types';
+  import { addFoodEntry, addMealEntries, undoEntries } from '../entryActions';
+  import { toastStore } from '../stores/toast.svelte';
+  import { CATEGORY_ORDER, CATEGORY_SHORT_LABELS, suggestCategory, todayKey } from '../utils/date';
   import { formatGrams, formatKcal } from '../utils/number';
 
   let {
@@ -29,126 +28,192 @@
   } = $props();
 
   const foods = liveValue<Food[]>(() => listFoods(), []);
+  const meals = liveValue<Meal[]>(() => listMeals(), []);
 
   let query = $state('');
-  // raw: Datensaetze aus der Datenbank bleiben einfache Objekte und lassen
-  // sich dadurch wieder speichern.
-  let selected = $state.raw<Food | null>(null);
+  let selectedFood = $state.raw<Food | null>(null);
+  let selectedMeal = $state.raw<Meal | null>(null);
   let amount = $state<number | null>(null);
+  let factor = $state<number | null>(1);
   let category = $state<MealCategory>(suggestCategory());
 
   // Jedes Oeffnen startet frisch, mit der zur Uhrzeit passenden Kategorie.
   $effect(() => {
     if (open) {
       query = '';
-      selected = null;
+      selectedFood = null;
+      selectedMeal = null;
       category = suggestCategory();
     }
   });
 
-  const sections = $derived(
-    query.trim()
-      ? [{ title: 'Treffer', items: foods.current.filter((f) => matchesQuery(f.name, query)) }]
+  const foodsById = $derived(new Map(foods.current.map((food) => [food.id, food])));
+  const trimmedQuery = $derived(query.trim());
+
+  const mealSections = $derived(
+    (() => {
+      const matching = trimmedQuery
+        ? meals.current.filter((meal) => matchesQuery(meal.name, query))
+        : meals.current;
+      const items = sortByRelevance(matching);
+      return items.length > 0 ? [{ title: 'Mahlzeiten', items }] : [];
+    })(),
+  );
+
+  const foodSections = $derived(
+    trimmedQuery
+      ? (() => {
+          const items = foods.current.filter((food) => matchesQuery(food.name, query));
+          return items.length > 0 ? [{ title: 'Lebensmittel', items }] : [];
+        })()
       : buildPickerSections(foods.current),
   );
 
-  const preview = $derived(
-    selected && amount !== null ? scaleNutrients(selected.per100, amount) : null,
+  const nothingToShow = $derived(mealSections.length === 0 && foodSections.length === 0);
+
+  const foodPreview = $derived(
+    selectedFood && amount !== null ? scaleNutrients(selectedFood.per100, amount) : null,
   );
-  const canAdd = $derived(selected !== null && amount !== null && amount > 0);
+  const mealPreview = $derived(
+    selectedMeal && factor !== null
+      ? mealNutrients(selectedMeal.ingredients, foodsById, factor)
+      : null,
+  );
+
+  const canAddFood = $derived(selectedFood !== null && amount !== null && amount > 0);
+  const canAddMeal = $derived(selectedMeal !== null && factor !== null && factor > 0);
 
   const categoryOptions = CATEGORY_ORDER.map((value) => ({
     value,
     label: CATEGORY_SHORT_LABELS[value],
   }));
 
-  function choose(food: Food) {
-    selected = food;
+  function chooseFood(food: Food) {
+    selectedFood = food;
     amount = food.servingSize ?? 100;
   }
 
-  async function add() {
-    const food = selected;
-    if (!food || amount === null || amount <= 0) return;
-
-    await addEntries([
-      {
-        timestamp: Date.now(),
-        day,
-        category,
-        amount,
-        name: food.name,
-        per100: food.per100,
-        unit: food.unit,
-        foodId: food.id,
-      },
-    ]);
-    await markFoodUsed(food.id);
-    open = false;
+  function chooseMeal(meal: Meal) {
+    selectedMeal = meal;
+    factor = 1;
   }
+
+  function showUndo(name: string, ids: string[]) {
+    if (ids.length === 0) return;
+    toastStore.show(`${name} eingetragen`, {
+      label: 'Rückgängig',
+      run: () => undoEntries(ids),
+    });
+  }
+
+  async function add() {
+    if (selectedMeal && factor !== null && factor > 0) {
+      const meal = selectedMeal;
+      const ids = await addMealEntries(meal, foodsById, { day, category }, factor);
+      open = false;
+      showUndo(meal.name, ids);
+      return;
+    }
+
+    if (selectedFood && amount !== null && amount > 0) {
+      const food = selectedFood;
+      const ids = await addFoodEntry(food, amount, { day, category });
+      open = false;
+      showUndo(food.name, ids);
+    }
+  }
+
+  const selectedName = $derived(selectedMeal?.name ?? selectedFood?.name ?? 'Hinzufügen');
+  const isPicking = $derived(selectedFood === null && selectedMeal === null);
 </script>
 
 <Sheet
   bind:open
-  title={selected ? selected.name : 'Hinzufügen'}
-  cancelLabel={selected ? 'Zurück' : 'Abbrechen'}
-  oncancel={selected ? () => (selected = null) : undefined}
-  confirmLabel={selected ? 'Hinzufügen' : undefined}
-  confirmDisabled={!canAdd}
+  title={isPicking ? 'Hinzufügen' : selectedName}
+  cancelLabel={isPicking ? 'Abbrechen' : 'Zurück'}
+  oncancel={isPicking
+    ? undefined
+    : () => {
+        selectedFood = null;
+        selectedMeal = null;
+      }}
+  confirmLabel={isPicking ? undefined : 'Hinzufügen'}
+  confirmDisabled={!(canAddFood || canAddMeal)}
   onconfirm={add}
 >
-  {#if !selected}
-    {#if foods.current.length === 0}
+  {#if isPicking}
+    {#if foods.current.length === 0 && meals.current.length === 0}
       <EmptyState
         title="Noch keine Lebensmittel"
         description="Lege in der Bibliothek ein Lebensmittel an, dann kannst du es hier mit einem Tipp eintragen."
       />
     {:else}
-      <SearchField bind:value={query} placeholder="Lebensmittel suchen" />
+      <SearchField bind:value={query} placeholder="Suchen" />
 
-      {#if sections.length === 0}
-        <EmptyState title="Nichts gefunden" description="Zu „{query}“ passt kein Lebensmittel." />
+      {#if nothingToShow}
+        <EmptyState title="Nichts gefunden" description="Zu „{query}“ passt kein Eintrag." />
       {:else}
-        {#each sections as section (section.title)}
-          <section>
-            <p class="section-title">{section.title}</p>
-            <div class="card list">
-              {#each section.items as food (food.id)}
-                <button type="button" class="pick" onclick={() => choose(food)}>
-                  <span class="name">{food.name}</span>
-                  <span class="per100">{formatKcal(food.per100.kcal)} kcal / 100 {food.unit}</span>
-                </button>
-              {/each}
-            </div>
-          </section>
-        {/each}
+        <PickerList
+          sections={mealSections}
+          secondary={(meal) =>
+            `${formatKcal(mealNutrients(meal.ingredients, foodsById).kcal)} kcal`}
+          onpick={chooseMeal}
+        />
+        <PickerList
+          sections={foodSections}
+          secondary={(food) => `${formatKcal(food.per100.kcal)} kcal / 100 ${food.unit}`}
+          onpick={chooseFood}
+        />
       {/if}
     {/if}
   {:else}
-    {@const food = selected}
     <div class="stack">
-      <FormGroup>
-        <NumberField
-          label="Menge"
-          bind:value={amount}
-          unit={food.unit}
-          decimal
-          autofocus
-          selectOnFocus
-        />
-      </FormGroup>
+      {#if selectedMeal}
+        {@const meal = selectedMeal}
+        <FormGroup footer="1 bedeutet eine ganze Mahlzeit, 0,5 eine halbe.">
+          <NumberField label="Portionen" bind:value={factor} unit="×" decimal selectOnFocus />
+        </FormGroup>
 
-      {#if food.servingSize !== undefined && food.servingName !== undefined}
-        {@const servingSize = food.servingSize}
-        <div class="chips">
-          <button type="button" class="chip" onclick={() => (amount = servingSize)}>
-            {food.servingName} · {formatGrams(servingSize)}
-            {food.unit}
-          </button>
-          <button type="button" class="chip" onclick={() => (amount = 100)}>
-            100 {food.unit}
-          </button>
-        </div>
+        <section>
+          <p class="section-title">Zutaten</p>
+          <div class="card list">
+            {#each meal.ingredients as ingredient (ingredient.foodId)}
+              {@const food = foodsById.get(ingredient.foodId)}
+              <div class="ingredient">
+                <span class="name">{food?.name ?? 'Gelöschtes Lebensmittel'}</span>
+                <span class="value">
+                  {formatGrams(ingredient.amount * (factor ?? 1))}
+                  {food?.unit ?? ''}
+                </span>
+              </div>
+            {/each}
+          </div>
+        </section>
+      {:else if selectedFood}
+        {@const food = selectedFood}
+        <FormGroup>
+          <NumberField
+            label="Menge"
+            bind:value={amount}
+            unit={food.unit}
+            decimal
+            autofocus
+            selectOnFocus
+          />
+        </FormGroup>
+
+        {#if food.servingSize !== undefined}
+          {@const servingSize = food.servingSize}
+          <div class="chips">
+            <button type="button" class="chip" onclick={() => (amount = servingSize)}>
+              {food.servingName} · {formatGrams(servingSize)}
+              {food.unit}
+            </button>
+            <button type="button" class="chip" onclick={() => (amount = 100)}>
+              100 {food.unit}
+            </button>
+          </div>
+        {/if}
       {/if}
 
       <section>
@@ -156,7 +221,8 @@
         <SegmentedControl label="Mahlzeit" options={categoryOptions} bind:value={category} />
       </section>
 
-      {#if preview}
+      {#if foodPreview || mealPreview}
+        {@const preview = mealPreview ?? foodPreview!}
         <div class="card preview">
           <strong>{formatKcal(preview.kcal)} kcal</strong>
           <div class="macros">
@@ -171,6 +237,11 @@
 </Sheet>
 
 <style>
+  .stack {
+    display: flex;
+    flex-direction: column;
+  }
+
   section {
     margin-top: 20px;
   }
@@ -179,43 +250,29 @@
     padding: 0;
   }
 
-  .pick {
+  .ingredient {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    width: 100%;
-    min-height: var(--tap);
-    padding: 10px 16px;
-    text-align: left;
+    padding: 9px 16px;
+    font-size: 15px;
   }
 
-  .pick + .pick {
+  .ingredient + .ingredient {
     box-shadow: inset 0 0.5px 0 var(--separator);
   }
 
-  .pick:active {
-    background: var(--fill);
-  }
-
   .name {
-    font-size: 17px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .per100 {
+  .value {
     flex: none;
-    font-size: 13px;
     color: var(--text-2);
     font-variant-numeric: tabular-nums;
-  }
-
-  .stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
   }
 
   .chips {

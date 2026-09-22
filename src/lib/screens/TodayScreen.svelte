@@ -4,11 +4,14 @@
   import DayEntries from '../components/DayEntries.svelte';
   import DayRings from '../components/DayRings.svelte';
   import EmptyState from '../components/EmptyState.svelte';
+  import QuickAddBar from '../components/QuickAddBar.svelte';
   import SettingsSheet from './SettingsSheet.svelte';
   import { sumEntries } from '../calc/nutrition';
   import { listEntriesForDay } from '../db/entries';
+  import { listFoods } from '../db/foods';
   import { liveValue } from '../db/live.svelte';
-  import type { FoodEntry } from '../db/types';
+  import { listMeals } from '../db/meals';
+  import type { Food, FoodEntry, Meal } from '../db/types';
   import { profileStore } from '../stores/profile.svelte';
   import { formatDayLong, todayKey } from '../utils/date';
 
@@ -17,6 +20,8 @@
 
   const day = todayKey();
   const entries = liveValue<FoodEntry[]>(() => listEntriesForDay(day), []);
+  const foods = liveValue<Food[]>(() => listFoods(), []);
+  const meals = liveValue<Meal[]>(() => listMeals(), []);
   const totals = $derived(sumEntries(entries.current));
 </script>
 
@@ -50,6 +55,8 @@
   {#if profileStore.current}
     <DayRings {totals} profile={profileStore.current} />
   {/if}
+
+  <QuickAddBar {day} foods={foods.current} meals={meals.current} />
 
   <div class="entries">
     {#if entries.current.length === 0}

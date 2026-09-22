@@ -17,6 +17,20 @@ function byName(a: Rankable, b: Rankable): number {
 }
 
 /**
+ * Reihenfolge fuer kurze Listen: Favoriten zuerst, dann haeufig, dann
+ * zuletzt verwendet.
+ */
+export function sortByRelevance<T extends Rankable>(items: T[]): T[] {
+  return [...items].sort(
+    (a, b) =>
+      Number(b.favorite) - Number(a.favorite) ||
+      b.usageCount - a.usageCount ||
+      (b.lastUsedAt ?? 0) - (a.lastUsedAt ?? 0) ||
+      byName(a, b),
+  );
+}
+
+/**
  * Gliedert die Auswahl in Favoriten, zuletzt und haeufig verwendet sowie den
  * Rest. Jeder Eintrag erscheint nur einmal, in der obersten passenden Gruppe.
  */

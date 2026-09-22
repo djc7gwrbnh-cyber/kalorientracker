@@ -1,5 +1,6 @@
 <script lang="ts">
   import TabBar from './lib/components/TabBar.svelte';
+  import Toast from './lib/components/Toast.svelte';
   import TodayScreen from './lib/screens/TodayScreen.svelte';
   import HistoryScreen from './lib/screens/HistoryScreen.svelte';
   import LibraryScreen from './lib/screens/LibraryScreen.svelte';
@@ -32,6 +33,7 @@
     </main>
     <TabBar active={tab} onselect={(next) => (tab = next)} />
   </div>
+  <Toast />
 {/if}
 
 <style>
