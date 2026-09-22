@@ -2,6 +2,7 @@
   import EmptyState from '../components/EmptyState.svelte';
   import FormGroup from '../components/FormGroup.svelte';
   import NumberField from '../components/NumberField.svelte';
+  import NutrientSummary from '../components/NutrientSummary.svelte';
   import PickerList from '../components/PickerList.svelte';
   import SearchField from '../components/SearchField.svelte';
   import SegmentedControl from '../components/SegmentedControl.svelte';
@@ -223,13 +224,8 @@
 
       {#if foodPreview || mealPreview}
         {@const preview = mealPreview ?? foodPreview!}
-        <div class="card preview">
-          <strong>{formatKcal(preview.kcal)} kcal</strong>
-          <div class="macros">
-            <span>P {formatGrams(preview.protein)} g</span>
-            <span>F {formatGrams(preview.fat)} g</span>
-            <span>KH {formatGrams(preview.carbs)} g</span>
-          </div>
+        <div class="preview">
+          <NutrientSummary nutrients={preview} />
         </div>
       {/if}
     </div>
@@ -295,24 +291,6 @@
   }
 
   .preview {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
     margin-top: 20px;
-  }
-
-  .preview strong {
-    font-size: 22px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .macros {
-    display: flex;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text-2);
-    font-variant-numeric: tabular-nums;
   }
 </style>

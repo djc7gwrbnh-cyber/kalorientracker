@@ -5,7 +5,15 @@
   import { CATEGORY_LABELS, CATEGORY_ORDER } from '../utils/date';
   import { formatGrams, formatKcal } from '../utils/number';
 
-  let { entries }: { entries: FoodEntry[] } = $props();
+  let {
+    entries,
+    onedit,
+    ondeletemeal,
+  }: {
+    entries: FoodEntry[];
+    onedit?: (entry: FoodEntry) => void;
+    ondeletemeal?: (entries: FoodEntry[]) => void;
+  } = $props();
 
   const groups = $derived(
     CATEGORY_ORDER.map((category) => ({
@@ -43,15 +51,18 @@
       {#each group.rows as row (row.key)}
         {#if row.kind === 'single'}
           {@const nutrients = entryNutrients(row.entry)}
+          {@const entry = row.entry}
           <div class="row">
-            <div class="main">
-              <span class="name">{row.entry.name}</span>
-              <span class="kcal">{formatKcal(nutrients.kcal)} kcal</span>
-            </div>
-            <div class="details">
-              <span>{formatGrams(row.entry.amount)} {row.entry.unit}</span>
-              {@render macros(nutrients)}
-            </div>
+            <button type="button" class="tappable" onclick={() => onedit?.(entry)}>
+              <div class="main">
+                <span class="name">{entry.name}</span>
+                <span class="kcal">{formatKcal(nutrients.kcal)} kcal</span>
+              </div>
+              <div class="details">
+                <span>{formatGrams(entry.amount)} {entry.unit}</span>
+                {@render macros(nutrients)}
+              </div>
+            </button>
           </div>
         {:else}
           {@const totals = sumEntries(row.entries)}
@@ -59,7 +70,7 @@
           <div class="row">
             <button
               type="button"
-              class="meal-head"
+              class="tappable"
               aria-expanded={isOpen}
               onclick={() => toggle(row.key)}
             >
@@ -96,15 +107,29 @@
             {#each row.entries as entry (entry.id)}
               {@const nutrients = entryNutrients(entry)}
               <div class="row sub">
-                <div class="main">
-                  <span class="name">{entry.name}</span>
-                  <span class="kcal">{formatKcal(nutrients.kcal)} kcal</span>
-                </div>
-                <div class="details">
-                  <span>{formatGrams(entry.amount)} {entry.unit}</span>
-                </div>
+                <button type="button" class="tappable" onclick={() => onedit?.(entry)}>
+                  <div class="main">
+                    <span class="name">{entry.name}</span>
+                    <span class="kcal">{formatKcal(nutrients.kcal)} kcal</span>
+                  </div>
+                  <div class="details">
+                    <span>{formatGrams(entry.amount)} {entry.unit}</span>
+                  </div>
+                </button>
               </div>
             {/each}
+            {#if ondeletemeal}
+              {@const mealEntries = row.entries}
+              <div class="row sub">
+                <button
+                  type="button"
+                  class="tappable remove"
+                  onclick={() => ondeletemeal(mealEntries)}
+                >
+                  Ganze Mahlzeit löschen
+                </button>
+              </div>
+            {/if}
           {/if}
         {/if}
       {/each}
@@ -136,28 +161,33 @@
     padding: 0;
   }
 
-  .row {
-    padding: 11px 16px;
-  }
-
   .row + .row {
     box-shadow: inset 0 0.5px 0 var(--separator);
   }
 
   .row.sub {
-    padding-left: 34px;
     background: var(--surface-2);
   }
 
-  .meal-head {
+  .tappable {
     display: block;
     width: 100%;
-    padding: 0;
+    min-height: var(--tap);
+    padding: 11px 16px;
     text-align: left;
   }
 
-  .meal-head:active {
+  .row.sub .tappable {
+    padding-left: 34px;
+  }
+
+  .tappable:active {
     opacity: 0.55;
+  }
+
+  .remove {
+    font-size: 15px;
+    color: var(--danger);
   }
 
   .main {

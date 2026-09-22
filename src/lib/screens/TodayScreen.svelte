@@ -5,9 +5,10 @@
   import DayRings from '../components/DayRings.svelte';
   import EmptyState from '../components/EmptyState.svelte';
   import QuickAddBar from '../components/QuickAddBar.svelte';
+  import EntryEditorSheet from './EntryEditorSheet.svelte';
   import SettingsSheet from './SettingsSheet.svelte';
   import { sumEntries } from '../calc/nutrition';
-  import { listEntriesForDay } from '../db/entries';
+  import { deleteEntries, listEntriesForDay } from '../db/entries';
   import { listFoods } from '../db/foods';
   import { liveValue } from '../db/live.svelte';
   import { listMeals } from '../db/meals';
@@ -17,6 +18,19 @@
 
   let settingsOpen = $state(false);
   let addOpen = $state(false);
+  let entryEditorOpen = $state(false);
+  let editingEntry = $state.raw<FoodEntry | null>(null);
+
+  function editEntry(entry: FoodEntry) {
+    editingEntry = entry;
+    entryEditorOpen = true;
+  }
+
+  async function deleteMeal(entries: FoodEntry[]) {
+    const name = entries[0]?.mealName ?? 'Mahlzeit';
+    if (!confirm(`„${name}“ vom heutigen Tag löschen?`)) return;
+    await deleteEntries(entries.map((entry) => entry.id));
+  }
 
   const day = todayKey();
   const entries = liveValue<FoodEntry[]>(() => listEntriesForDay(day), []);
@@ -62,7 +76,7 @@
     {#if entries.current.length === 0}
       <EmptyState title="Noch nichts eingetragen" description="Tippe auf „+“, um zu starten." />
     {:else}
-      <DayEntries entries={entries.current} />
+      <DayEntries entries={entries.current} onedit={editEntry} ondeletemeal={deleteMeal} />
     {/if}
   </div>
 </div>
@@ -82,6 +96,7 @@
 
 <SettingsSheet bind:open={settingsOpen} />
 <AddEntrySheet bind:open={addOpen} {day} />
+<EntryEditorSheet bind:open={entryEditorOpen} entry={editingEntry} />
 
 <style>
   .gear {

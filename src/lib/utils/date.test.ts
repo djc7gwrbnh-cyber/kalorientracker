@@ -3,6 +3,7 @@ import {
   addDays,
   daysBetween,
   describeDay,
+  describeDayShort,
   formatDayFull,
   formatDayShort,
   suggestCategory,
@@ -50,6 +51,12 @@ describe('Anzeige', () => {
     expect(describeDay('2026-09-22', '2026-09-22')).toBe('Heute');
     expect(describeDay('2026-09-21', '2026-09-22')).toBe('Gestern');
     expect(describeDay('2026-09-20', '2026-09-22')).toBe('Sonntag, 20. September');
+  });
+
+  it('kuerzt die Bezeichnung fuer Listen ab', () => {
+    expect(describeDayShort('2026-09-22', '2026-09-22')).toBe('Heute');
+    expect(describeDayShort('2026-09-21', '2026-09-22')).toBe('Gestern');
+    expect(describeDayShort('2026-09-20', '2026-09-22')).toBe('So, 20.09.');
   });
 });
 

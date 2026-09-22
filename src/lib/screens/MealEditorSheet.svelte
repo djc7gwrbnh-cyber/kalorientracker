@@ -1,6 +1,7 @@
 <script lang="ts">
   import FormGroup from '../components/FormGroup.svelte';
   import NumberField from '../components/NumberField.svelte';
+  import NutrientSummary from '../components/NutrientSummary.svelte';
   import PickerList from '../components/PickerList.svelte';
   import SearchField from '../components/SearchField.svelte';
   import Sheet from '../components/Sheet.svelte';
@@ -208,13 +209,8 @@
       </section>
 
       {#if draft.ingredients.length > 0}
-        <div class="card totals">
-          <strong>{formatKcal(totals.kcal)} kcal</strong>
-          <div class="macros">
-            <span>P {formatGrams(totals.protein)} g</span>
-            <span>F {formatGrams(totals.fat)} g</span>
-            <span>KH {formatGrams(totals.carbs)} g</span>
-          </div>
+        <div class="totals">
+          <NutrientSummary nutrients={totals} />
         </div>
       {/if}
 
@@ -320,26 +316,6 @@
     background: var(--fill);
   }
 
-  .totals {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .totals strong {
-    font-size: 22px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .macros {
-    display: flex;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text-2);
-    font-variant-numeric: tabular-nums;
-  }
 
   .delete {
     width: 100%;

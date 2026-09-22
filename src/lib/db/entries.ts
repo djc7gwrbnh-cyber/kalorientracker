@@ -26,8 +26,6 @@ export async function deleteEntries(ids: string[]): Promise<void> {
   await db.entries.bulkDelete(ids);
 }
 
-/** Alle Tage mit mindestens einem Eintrag, neueste zuerst. */
-export async function listDaysWithEntries(): Promise<string[]> {
-  const days = await db.entries.orderBy('day').uniqueKeys();
-  return days.map(String).reverse();
+export async function listAllEntries(): Promise<FoodEntry[]> {
+  return db.entries.toArray();
 }

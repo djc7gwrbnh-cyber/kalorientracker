@@ -77,6 +77,14 @@ export function describeDay(day: string, today = todayKey()): string {
   return formatDayLong(day);
 }
 
+/** Kurzform fuer Listen: "Heute", "Gestern" oder "So, 20.09.". */
+export function describeDayShort(day: string, today = todayKey()): string {
+  const diff = daysBetween(day, today);
+  if (diff === 0) return 'Heute';
+  if (diff === 1) return 'Gestern';
+  return `${formatWeekday(day)}, ${formatDayShort(day)}`;
+}
+
 /** Schlaegt anhand der Uhrzeit eine Kategorie vor; immer aenderbar. */
 export function suggestCategory(date = new Date()): MealCategory {
   const hour = date.getHours();
