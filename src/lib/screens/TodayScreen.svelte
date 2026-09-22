@@ -1,14 +1,25 @@
 <script lang="ts">
   import AppHeader from '../components/AppHeader.svelte';
+  import DayEntries from '../components/DayEntries.svelte';
+  import DayRings from '../components/DayRings.svelte';
   import EmptyState from '../components/EmptyState.svelte';
   import SettingsSheet from './SettingsSheet.svelte';
+  import { sumEntries } from '../calc/nutrition';
+  import { listEntriesForDay } from '../db/entries';
+  import { liveValue } from '../db/live.svelte';
+  import type { FoodEntry } from '../db/types';
+  import { profileStore } from '../stores/profile.svelte';
   import { formatDayLong, todayKey } from '../utils/date';
 
   let settingsOpen = $state(false);
+
+  const day = todayKey();
+  const entries = liveValue<FoodEntry[]>(() => listEntriesForDay(day), []);
+  const totals = $derived(sumEntries(entries.current));
 </script>
 
 <div class="screen">
-  <AppHeader title="Heute" subtitle={formatDayLong(todayKey())}>
+  <AppHeader title="Heute" subtitle={formatDayLong(day)}>
     {#snippet action()}
       <button
         type="button"
@@ -34,10 +45,20 @@
     {/snippet}
   </AppHeader>
 
-  <EmptyState
-    title="Noch nichts eingetragen"
-    description="Hier erscheinen gleich deine Ringe für Kalorien, Protein und Fett sowie die Einträge des Tages."
-  />
+  {#if profileStore.current}
+    <DayRings {totals} profile={profileStore.current} />
+  {/if}
+
+  <div class="entries">
+    {#if entries.current.length === 0}
+      <EmptyState
+        title="Noch nichts eingetragen"
+        description="Tippe auf „+“, um dein erstes Lebensmittel für heute zu erfassen."
+      />
+    {:else}
+      <DayEntries entries={entries.current} />
+    {/if}
+  </div>
 </div>
 
 <SettingsSheet bind:open={settingsOpen} />
@@ -60,5 +81,9 @@
 
   .gear:active {
     opacity: 0.5;
+  }
+
+  .entries {
+    margin-top: 24px;
   }
 </style>
