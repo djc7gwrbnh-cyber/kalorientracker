@@ -35,9 +35,19 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Die WebAssembly-Datei des Barcode-Scanners bleibt bewusst aussen vor:
+        // sie ist ueber 1 MB gross und nur fuer eine optionale Funktion noetig.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            // Nach dem ersten Scan liegt sie im Cache und funktioniert offline.
+            urlPattern: ({ url }) => url.pathname.endsWith('.wasm'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'wasm', expiration: { maxEntries: 4 } },
+          },
+        ],
       },
       devOptions: { enabled: false },
     }),

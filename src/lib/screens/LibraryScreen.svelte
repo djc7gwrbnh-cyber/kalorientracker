@@ -5,9 +5,10 @@
   import SegmentedControl from '../components/SegmentedControl.svelte';
   import FoodEditorSheet from './FoodEditorSheet.svelte';
   import MealEditorSheet from './MealEditorSheet.svelte';
+  import OnlineSearchSheet from './OnlineSearchSheet.svelte';
   import { mealNutrients } from '../calc/meals';
   import { matchesQuery } from '../calc/search';
-  import { listFoods, setFoodFavorite } from '../db/foods';
+  import { listFoods, setFoodFavorite, type FoodDraft } from '../db/foods';
   import { listMeals, setMealFavorite } from '../db/meals';
   import { liveValue } from '../db/live.svelte';
   import type { Food, Meal } from '../db/types';
@@ -23,6 +24,8 @@
 
   let foodEditorOpen = $state(false);
   let editingFood = $state.raw<Food | null>(null);
+  let onlineOpen = $state(false);
+  let prefill = $state.raw<FoodDraft | null>(null);
   let mealEditorOpen = $state(false);
   let editingMeal = $state.raw<Meal | null>(null);
 
@@ -44,17 +47,44 @@
   function openNew() {
     if (section === 'foods') {
       editingFood = null;
+      prefill = null;
       foodEditorOpen = true;
     } else {
       editingMeal = null;
       mealEditorOpen = true;
     }
   }
+
+  function openFromOnline(draft: FoodDraft) {
+    editingFood = null;
+    prefill = draft;
+    foodEditorOpen = true;
+  }
 </script>
 
 <div class="screen">
   <AppHeader title="Bibliothek">
     {#snippet action()}
+      {#if section === 'foods'}
+        <button
+          type="button"
+          class="add scan"
+          aria-label="Online suchen oder Barcode scannen"
+          onclick={() => (onlineOpen = true)}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17" />
+            <path d="M7.5 8.5v7M10.5 8.5v7M13.5 8.5v7M16.5 8.5v7" />
+          </svg>
+        </button>
+      {/if}
       <button
         type="button"
         class="add"
@@ -100,7 +130,15 @@
       {/snippet}
     </EmptyState>
   {:else if visible === 0}
-    <EmptyState title="Nichts gefunden" description="Zu „{query}“ passt kein Eintrag." />
+    <EmptyState title="Nichts gefunden" description="Zu „{query}“ passt kein Eintrag.">
+      {#snippet action()}
+        {#if section === 'foods'}
+          <button type="button" class="btn btn-secondary" onclick={() => (onlineOpen = true)}>
+            Online suchen
+          </button>
+        {/if}
+      {/snippet}
+    </EmptyState>
   {:else if section === 'foods'}
     <div class="card list">
       {#each visibleFoods as food (food.id)}
@@ -189,12 +227,14 @@
   {/if}
 </div>
 
-<FoodEditorSheet bind:open={foodEditorOpen} food={editingFood} />
+<FoodEditorSheet bind:open={foodEditorOpen} food={editingFood} initialDraft={prefill} />
+<OnlineSearchSheet bind:open={onlineOpen} initialQuery={query} onpick={openFromOnline} />
 <MealEditorSheet bind:open={mealEditorOpen} meal={editingMeal} foods={foods.current} />
 
 <style>
   .add {
     display: flex;
+    flex: none;
     align-items: center;
     justify-content: center;
     width: var(--tap);
@@ -206,6 +246,10 @@
   .add svg {
     width: 26px;
     height: 26px;
+  }
+
+  .add.scan {
+    margin-right: 0;
   }
 
   .add:active {

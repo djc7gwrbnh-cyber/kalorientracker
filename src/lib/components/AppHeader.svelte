@@ -39,6 +39,8 @@
 
   .action {
     flex: none;
+    display: flex;
+    align-items: center;
     padding-top: 4px;
   }
 </style>

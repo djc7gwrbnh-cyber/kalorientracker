@@ -19,18 +19,21 @@
   let {
     open = $bindable(),
     food = null,
+    initialDraft = null,
     onsaved,
   }: {
     open: boolean;
     /** null legt ein neues Lebensmittel an. */
     food?: Food | null;
+    /** Vorbelegung fuer ein neues Lebensmittel, z. B. aus Open Food Facts. */
+    initialDraft?: FoodDraft | null;
     onsaved?: (food: Food) => void;
   } = $props();
 
   let draft = $state<FoodDraft>(emptyFoodDraft());
 
   $effect(() => {
-    if (open) draft = food ? toFoodDraft(food) : emptyFoodDraft();
+    if (open) draft = food ? toFoodDraft(food) : (initialDraft ?? emptyFoodDraft());
   });
 
   const values = $derived(toFoodValues(draft));

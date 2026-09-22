@@ -21,9 +21,19 @@ Die App-Icons liegen unter `public/` und werden mit
   Framework-Runtime.
 - **Dexie.js** – schlanker IndexedDB-Wrapper mit sauberen Migrationen.
 - **vite-plugin-pwa** – erzeugt Service Worker und Web App Manifest.
+- **barcode-detector** – nur für den Barcode-Scanner, erst beim ersten Scan
+  nachgeladen (Safari kennt die `BarcodeDetector`-API nicht). Die
+  WebAssembly-Datei liegt im eigenen Verzeichnis, nicht auf einem fremden CDN.
 
 Mehr Laufzeit-Abhängigkeiten gibt es nicht; Diagramme und Ringe sind
 handgeschriebenes SVG.
+
+## Online-Suche
+
+Optional lassen sich Lebensmittel über [Open Food Facts](https://world.openfoodfacts.org)
+suchen oder per Barcode abrufen. Die Werte sind vor dem Speichern bearbeitbar
+und landen danach lokal in der Datenbank. Ohne Internet meldet die App das
+sauber; alles andere funktioniert weiter.
 
 ## Deployment
 

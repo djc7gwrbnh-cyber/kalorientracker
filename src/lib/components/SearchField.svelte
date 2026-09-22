@@ -2,7 +2,16 @@
   let {
     value = $bindable(),
     placeholder = 'Suchen',
-  }: { value: string; placeholder?: string } = $props();
+    onsearch,
+  }: { value: string; placeholder?: string; onsearch?: () => void } = $props();
+
+  function handleKey(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      (event.currentTarget as HTMLInputElement).blur();
+      onsearch?.();
+    }
+  }
 </script>
 
 <div class="search">
@@ -19,6 +28,7 @@
     aria-label={placeholder}
     {placeholder}
     bind:value
+    onkeydown={handleKey}
   />
   {#if value}
     <button type="button" aria-label="Suche löschen" onclick={() => (value = '')}>

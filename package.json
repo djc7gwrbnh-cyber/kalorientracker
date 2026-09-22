@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "barcode-detector": "3.2.2",
     "dexie": "4.4.6",
     "svelte": "5.57.1"
   },
