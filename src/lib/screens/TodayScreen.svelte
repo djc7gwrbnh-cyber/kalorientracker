@@ -14,6 +14,7 @@
   import { listMeals } from '../db/meals';
   import type { Food, FoodEntry, Meal } from '../db/types';
   import { profileStore } from '../stores/profile.svelte';
+  import { toastStore } from '../stores/toast.svelte';
   import { formatDayLong, todayKey } from '../utils/date';
 
   let settingsOpen = $state(false);
@@ -81,7 +82,13 @@
   </div>
 </div>
 
-<button type="button" class="fab" aria-label="Essen hinzufügen" onclick={() => (addOpen = true)}>
+<button
+  type="button"
+  class="fab"
+  class:raised={toastStore.current !== null}
+  aria-label="Essen hinzufügen"
+  onclick={() => (addOpen = true)}
+>
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -137,7 +144,12 @@
     background: var(--accent);
     color: #ffffff;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
-    transition: transform 0.12s ease;
+    transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* Weicht dem Hinweis aus, statt halb dahinter zu verschwinden. */
+  .fab.raised {
+    transform: translateY(-68px);
   }
 
   .fab svg {
@@ -147,5 +159,9 @@
 
   .fab:active {
     transform: scale(0.94);
+  }
+
+  .fab.raised:active {
+    transform: translateY(-68px) scale(0.94);
   }
 </style>

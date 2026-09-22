@@ -74,7 +74,9 @@
     align-items: center;
     gap: 12px;
     min-height: var(--tap);
-    padding: 6px 16px;
+    /* Kein senkrechter Abstand: das Eingabefeld selbst fuellt die Zeilenhoehe
+       und ist damit auf voller Hoehe antippbar. */
+    padding: 0 16px;
   }
 
   label {
@@ -90,7 +92,8 @@
 
   input {
     width: 6ch;
-    padding: 6px 0;
+    min-height: var(--tap);
+    padding: 0;
     border: none;
     background: none;
     text-align: right;

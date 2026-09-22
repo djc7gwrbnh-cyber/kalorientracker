@@ -32,7 +32,7 @@
     gap: 12px;
     max-width: 520px;
     margin: 0 auto;
-    padding: 10px 10px 10px 16px;
+    padding: 6px 6px 6px 16px;
     border-radius: 14px;
     background: var(--surface-2);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.24);
@@ -55,8 +55,8 @@
 
   button {
     flex: none;
-    min-height: 36px;
-    padding: 0 12px;
+    min-height: var(--tap);
+    padding: 0 14px;
     border-radius: 10px;
     font-size: 15px;
     font-weight: 600;

@@ -24,7 +24,7 @@
     align-items: center;
     gap: 12px;
     min-height: var(--tap);
-    padding: 6px 16px;
+    padding: 0 16px;
   }
 
   label {
@@ -33,7 +33,8 @@
 
   input {
     flex: none;
-    padding: 4px 0;
+    min-height: var(--tap);
+    padding: 0;
     border: none;
     background: none;
     text-align: right;

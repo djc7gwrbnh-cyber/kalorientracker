@@ -11,7 +11,9 @@ export default defineConfig({
   plugins: [
     svelte(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // "prompt" statt "autoUpdate": die App laedt nie ungefragt neu, sondern
+      // bietet das Update an, wenn es gerade passt.
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Kalorientracker',

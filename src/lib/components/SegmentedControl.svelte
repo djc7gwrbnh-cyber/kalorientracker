@@ -34,8 +34,9 @@
   }
 
   button {
+    position: relative;
     flex: 1;
-    min-height: 30px;
+    min-height: 36px;
     padding: 0 12px;
     border-radius: 7px;
     font-size: 13px;
@@ -45,6 +46,13 @@
     transition:
       background 0.15s ease,
       box-shadow 0.15s ease;
+  }
+
+  /* Optisch bleibt die Leiste flach wie in iOS, die Trefferflaeche ist 44px. */
+  button::after {
+    content: '';
+    position: absolute;
+    inset: -4px 0;
   }
 
   button.selected {

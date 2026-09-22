@@ -5,8 +5,10 @@
   --surface: #ffffff;
   --surface-2: #f2f2f7;
   --text: #000000;
-  --text-2: rgba(60, 60, 67, 0.6);
-  --text-3: rgba(60, 60, 67, 0.3);
+  /* 0.75 statt Apples 0.6: ergibt auf hellem Grund rund 4,7:1 und damit
+     ausreichenden Kontrast fuer Fliesstext. */
+  --text-2: rgba(60, 60, 67, 0.75);
+  --text-3: rgba(60, 60, 67, 0.45);
   --separator: rgba(60, 60, 67, 0.18);
   --fill: rgba(120, 120, 128, 0.12);
   --fill-strong: rgba(120, 120, 128, 0.2);

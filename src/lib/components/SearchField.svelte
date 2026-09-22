@@ -36,8 +36,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    height: 36px;
-    padding: 0 8px;
+    height: var(--tap);
+    padding: 0 10px;
     border-radius: 10px;
     background: var(--fill);
     color: var(--text-2);
@@ -77,8 +77,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     color: var(--text-3);
   }
 
