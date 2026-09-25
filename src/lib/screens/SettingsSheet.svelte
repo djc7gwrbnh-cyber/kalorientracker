@@ -76,6 +76,7 @@
         plural(counts.meals, 'Mahlzeit', 'Mahlzeiten'),
         plural(counts.entries, 'Eintrag', 'Einträge'),
         plural(counts.weights, 'Gewichtswert', 'Gewichtswerte'),
+        plural(counts.workouts, 'Trainingseinheit', 'Trainingseinheiten'),
       ].join(', ');
 
       const sure = confirm(

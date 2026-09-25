@@ -2,6 +2,7 @@
   import TabBar from './lib/components/TabBar.svelte';
   import Toast from './lib/components/Toast.svelte';
   import TodayScreen from './lib/screens/TodayScreen.svelte';
+  import TrainingScreen from './lib/screens/TrainingScreen.svelte';
   import HistoryScreen from './lib/screens/HistoryScreen.svelte';
   import LibraryScreen from './lib/screens/LibraryScreen.svelte';
   import WeightScreen from './lib/screens/WeightScreen.svelte';
@@ -23,6 +24,8 @@
     <main>
       {#if tab === 'today'}
         <TodayScreen />
+      {:else if tab === 'training'}
+        <TrainingScreen />
       {:else if tab === 'history'}
         <HistoryScreen />
       {:else if tab === 'library'}

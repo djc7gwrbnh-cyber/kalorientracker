@@ -95,3 +95,13 @@ export interface WeightEntry {
   weight: number;
   updatedAt: number;
 }
+
+export interface WorkoutEntry {
+  /** Lokaler Tag im Format YYYY-MM-DD, zugleich Primaerschluessel. */
+  day: string;
+  /** Was trainiert wurde, z. B. "Push" oder "Beine". */
+  type: string;
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+}

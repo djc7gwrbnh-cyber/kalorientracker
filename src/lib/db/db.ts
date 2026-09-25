@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Food, FoodEntry, Meal, UserProfile, WeightEntry } from './types';
+import type { Food, FoodEntry, Meal, UserProfile, WeightEntry, WorkoutEntry } from './types';
 
 /**
  * Schema-Aenderungen kommen immer als neue version(...)-Zeile dazu, damit
@@ -11,6 +11,7 @@ class AppDatabase extends Dexie {
   meals!: Table<Meal, string>;
   entries!: Table<FoodEntry, string>;
   weights!: Table<WeightEntry, string>;
+  workouts!: Table<WorkoutEntry, string>;
 
   constructor() {
     super('kalorientracker');
@@ -21,6 +22,11 @@ class AppDatabase extends Dexie {
       meals: 'id, name, favorite, usageCount, lastUsedAt',
       entries: 'id, day, [day+category], timestamp, foodId, mealGroupId',
       weights: 'day',
+    });
+
+    // Neue Tabelle in einer eigenen Version: bestehende Daten bleiben erhalten.
+    this.version(2).stores({
+      workouts: 'day, type',
     });
   }
 }

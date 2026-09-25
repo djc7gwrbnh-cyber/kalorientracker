@@ -26,6 +26,8 @@
         {#if tab.id === 'today'}
           <path d="M12 4a8 8 0 1 0 8 8" />
           <circle cx="12" cy="4" r="0.9" fill="currentColor" stroke="none" />
+        {:else if tab.id === 'training'}
+          <path d="M6.5 9.5v5M4 10.5v3M17.5 9.5v5M20 10.5v3M6.5 12h11" />
         {:else if tab.id === 'history'}
           <circle cx="5.2" cy="7" r="1.1" fill="currentColor" stroke="none" />
           <circle cx="5.2" cy="12" r="1.1" fill="currentColor" stroke="none" />

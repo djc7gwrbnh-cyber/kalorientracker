@@ -28,6 +28,12 @@ Die App-Icons liegen unter `public/` und werden mit
 Mehr Laufzeit-Abhängigkeiten gibt es nicht; Diagramme und Ringe sind
 handgeschriebenes SVG.
 
+## Trainings-Tab
+
+Ein Tab erfasst pro Tag, was trainiert wurde. Die Jahresansicht zeigt jeden
+Tag als Kachel – eine Spalte je Kalenderwoche, eine Zeile je Wochentag –
+eingefärbt nach Trainingsart.
+
 ## Online-Suche
 
 Optional lassen sich Lebensmittel über [Open Food Facts](https://world.openfoodfacts.org)

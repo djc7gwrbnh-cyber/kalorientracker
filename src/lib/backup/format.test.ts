@@ -4,7 +4,7 @@ import { backupFileName, countBackup, parseBackup, type Backup } from './format'
 function validBackup(overrides: Partial<Backup> = {}): Backup {
   return {
     format: 'kalorientracker-backup',
-    version: 1,
+    version: 2,
     exportedAt: '2026-09-22T08:00:00.000Z',
     profile: {
       id: 'profile',
@@ -52,6 +52,7 @@ function validBackup(overrides: Partial<Backup> = {}): Backup {
       },
     ],
     weights: [{ day: '2026-09-22', weight: 108.4, updatedAt: 0 }],
+    workouts: [{ day: '2026-09-22', type: 'Push', createdAt: 0, updatedAt: 0 }],
     ...overrides,
   };
 }
@@ -67,9 +68,26 @@ describe('parseBackup', () => {
 
   it('akzeptiert ein leeres, aber gueltiges Backup', () => {
     const result = parse(
-      validBackup({ profile: null, foods: [], meals: [], entries: [], weights: [] }),
+      validBackup({ profile: null, foods: [], meals: [], entries: [], weights: [], workouts: [] }),
     );
     expect(result.ok).toBe(true);
+  });
+
+  it('liest ein Backup der Version 1 ohne Trainingsdaten', () => {
+    const backup = validBackup({ version: 1 }) as unknown as Record<string, unknown>;
+    delete backup.workouts;
+
+    const result = parse(backup);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.backup.workouts).toEqual([]);
+  });
+
+  it('erkennt fehlerhafte Trainingseinheiten', () => {
+    const result = parse(
+      validBackup({ workouts: [{ day: '22.09.2026', type: 'Push' }] as unknown as Backup['workouts'] }),
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain('Trainingseinheiten');
   });
 
   it('lehnt kaputtes JSON ab', () => {
@@ -137,6 +155,7 @@ describe('countBackup', () => {
       meals: 1,
       entries: 1,
       weights: 1,
+      workouts: 1,
       hasProfile: true,
     });
   });

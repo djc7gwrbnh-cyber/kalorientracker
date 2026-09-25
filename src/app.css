@@ -21,6 +21,14 @@
   --danger: #ff3b30;
   --track: rgba(120, 120, 128, 0.16);
 
+  /* Farben fuer Trainingsarten, in fester Reihenfolge vergeben. */
+  --chart-1: #34c759;
+  --chart-2: #007aff;
+  --chart-3: #ff9500;
+  --chart-4: #af52de;
+  --chart-5: #ff2d55;
+  --chart-6: #30b0c7;
+
   --radius-card: 16px;
   --radius-control: 12px;
   --radius-pill: 999px;
@@ -59,6 +67,13 @@
     --carbs: #bf5af2;
     --danger: #ff453a;
     --track: rgba(120, 120, 128, 0.28);
+
+    --chart-1: #30d158;
+    --chart-2: #0a84ff;
+    --chart-3: #ff9f0a;
+    --chart-4: #bf5af2;
+    --chart-5: #ff375f;
+    --chart-6: #40c8e0;
   }
 }
 

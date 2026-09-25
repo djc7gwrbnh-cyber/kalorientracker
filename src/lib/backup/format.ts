@@ -1,7 +1,8 @@
-import type { Food, FoodEntry, Meal, UserProfile, WeightEntry } from '../db/types';
+import type { Food, FoodEntry, Meal, UserProfile, WeightEntry, WorkoutEntry } from '../db/types';
 
 export const BACKUP_FORMAT = 'kalorientracker-backup';
-export const BACKUP_VERSION = 1;
+/** 2 seit dem Trainings-Tab; Version 1 laesst sich weiterhin einlesen. */
+export const BACKUP_VERSION = 2;
 
 export interface Backup {
   format: typeof BACKUP_FORMAT;
@@ -12,6 +13,7 @@ export interface Backup {
   meals: Meal[];
   entries: FoodEntry[];
   weights: WeightEntry[];
+  workouts: WorkoutEntry[];
 }
 
 export interface BackupCounts {
@@ -19,6 +21,7 @@ export interface BackupCounts {
   meals: number;
   entries: number;
   weights: number;
+  workouts: number;
   hasProfile: boolean;
 }
 
@@ -97,6 +100,10 @@ function isWeight(value: unknown): boolean {
   return isObject(value) && isDay(value.day) && isNumber(value.weight);
 }
 
+function isWorkout(value: unknown): boolean {
+  return isObject(value) && isDay(value.day) && isString(value.type);
+}
+
 function isProfile(value: unknown): boolean {
   return (
     isObject(value) &&
@@ -142,12 +149,18 @@ export function parseBackup(text: string): ParseResult {
     if (!list.every(check)) return { ok: false, error: `Der Abschnitt „${label}“ ist fehlerhaft.` };
   }
 
+  // Erst ab Version 2 dabei: aeltere Dateien bleiben gueltig.
+  const workouts = data.workouts ?? [];
+  if (!Array.isArray(workouts) || !workouts.every(isWorkout)) {
+    return { ok: false, error: 'Der Abschnitt „Trainingseinheiten“ ist fehlerhaft.' };
+  }
+
   const profile = data.profile ?? null;
   if (profile !== null && !isProfile(profile)) {
     return { ok: false, error: 'Das Profil in der Datei ist fehlerhaft.' };
   }
 
-  return { ok: true, backup: data as unknown as Backup };
+  return { ok: true, backup: { ...data, workouts } as unknown as Backup };
 }
 
 export function countBackup(backup: Backup): BackupCounts {
@@ -156,6 +169,7 @@ export function countBackup(backup: Backup): BackupCounts {
     meals: backup.meals.length,
     entries: backup.entries.length,
     weights: backup.weights.length,
+    workouts: backup.workouts.length,
     hasProfile: backup.profile !== null,
   };
 }

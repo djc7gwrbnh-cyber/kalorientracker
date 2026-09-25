@@ -51,12 +51,14 @@ export function formatKcal(value: number): string {
   return formatter(0, 0).format(Math.round(value));
 }
 
-/**
- * Gramm-Angabe mit hoechstens einer Nachkommastelle; ganze Werte bleiben
- * ohne Komma ("25" statt "25,0").
- */
-export function formatGrams(value: number): string {
+/** Zahl mit hoechstens einer Nachkommastelle ("25" statt "25,0"). */
+export function formatDecimal(value: number): string {
   return formatter(0, 1).format(value);
+}
+
+/** Gramm-Angabe; ganze Werte bleiben ohne Komma. */
+export function formatGrams(value: number): string {
+  return formatDecimal(value);
 }
 
 /** Gewicht mit genau einer Nachkommastelle, z. B. "108,4". */
